@@ -1,8 +1,6 @@
 import * as React from "react";
 
-interface IHeaderProps {}
-
-const Header: React.FunctionComponent<IHeaderProps> = (props) => {
+const Header: React.FC = () => {
   return (
     <div className="bg-slate-900">
       <div className="container p-2 mx-auto">

@@ -9,26 +9,42 @@ interface IFormContainerProps {
 const FormContainer: React.FunctionComponent<IFormContainerProps> = (props) => {
   const { updateReloadState } = props;
   const [fullUrl, setFullUrl] = React.useState<string>("");
+  const [error, setError] = React.useState<string | null>(null);
+  const [submitting, setSubmitting] = React.useState(false);
+
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    setError(null);
+    setSubmitting(true);
     try {
-      await axios.post(`${serverUrl}/shorturl`, {
+      await axios.post(`${serverUrl}/shortUrl`, {
         fullUrl: fullUrl,
       });
       setFullUrl("");
       updateReloadState();
-    } catch (error) {
-      console.log("Error: ", error);
+    } catch (err) {
+      if (axios.isAxiosError(err) && err.response?.data?.message) {
+        setError(String(err.response.data.message));
+      } else {
+        setError("Could not shorten URL. Check the address and try again.");
+      }
+    } finally {
+      setSubmitting(false);
     }
   };
   return (
     <div className="container mx-auto p-2">
-      <div
-        className=" my-8 rounded-xl bg-cover bg-center"
-        style={{ backgroundImage: "url('/src/assets/bg.jpg')" }}
-      >
-        <div className="w-full h-full rounded-xl p-20 backdrop-brightness-50">
-          <h2 className="text-white text-4xl text-center pb-4">URLSHortner</h2>
+      <div className="my-8 rounded-xl bg-gradient-to-br from-slate-800 via-slate-900 to-indigo-950 bg-cover bg-center shadow-lg">
+        <div className="w-full h-full rounded-xl p-12 sm:p-20">
+          {error && (
+            <p
+              className="mb-4 rounded-lg bg-red-900/80 px-4 py-2 text-center text-sm text-red-100"
+              role="alert"
+            >
+              {error}
+            </p>
+          )}
+          <h2 className="text-white text-4xl text-center pb-4">URL Shortener</h2>
           <p className="text-white text-center text-xl pb-2 font-extralight">
             paste your untidy link to shorten it
           </p>
@@ -54,9 +70,10 @@ const FormContainer: React.FunctionComponent<IFormContainerProps> = (props) => {
                 />
                 <button
                   type="submit"
-                  className="absolute top-0 end-0 p-2.5 text-small font-medium h-full text-white bg-blue-700 rounded border border-blue-700 focus:ring-4 focus:outline-none focus:ring-blue-300"
+                  disabled={submitting}
+                  className="absolute top-0 end-0 p-2.5 text-small font-medium h-full text-white bg-blue-700 rounded border border-blue-700 focus:ring-4 focus:outline-none focus:ring-blue-300 disabled:opacity-60"
                 >
-                  Shorten URL
+                  {submitting ? "…" : "Shorten URL"}
                 </button>
               </div>
             </div>

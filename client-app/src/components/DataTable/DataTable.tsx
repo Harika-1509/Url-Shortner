@@ -1,8 +1,9 @@
 import * as React from "react";
 import { UrlData } from "../../interface/UrlData";
-import { Link } from "react-router-dom";
 import { serverUrl } from "../../helpers/Constants";
 import axios from "axios";
+
+const shortLink = (code: string) => `${serverUrl}/shortUrl/${code}`;
 
 interface IDataTableProps {
   data: UrlData[];
@@ -11,7 +12,6 @@ interface IDataTableProps {
 
 const DataTable: React.FunctionComponent<IDataTableProps> = (props) => {
   const { data, updateReloadState } = props;
-  console.log("Data in DataTable is :", data);
   const renderTableData = () => {
     return data.map((item) => {
       return (
@@ -20,18 +20,24 @@ const DataTable: React.FunctionComponent<IDataTableProps> = (props) => {
           className="border-b text-white bg-gray-600 hover:bg-white hover:text-gray-800"
         >
           <td className="px-6 py-3 break-words">
-            <Link to={item.fullUrl} target="_blank" rel="noreferrer noopener ">
+            <a
+              href={item.fullUrl}
+              target="_blank"
+              rel="noreferrer noopener"
+              className="text-blue-300 hover:underline"
+            >
               {item.fullUrl}
-            </Link>
+            </a>
           </td>
           <td className="px-6 py-3">
-            <Link
-              to={`${serverUrl}/shortUrl/${item.shortUrl}`}
+            <a
+              href={shortLink(item.shortUrl)}
               target="_blank"
-              rel="noreferrer noopener "
+              rel="noreferrer noopener"
+              className="text-blue-300 hover:underline"
             >
               {item.shortUrl}
-            </Link>
+            </a>
           </td>
           <td className="px-6 py-3">{item.clicks}</td>
           <td className="px-6 py-3">
@@ -81,18 +87,22 @@ const DataTable: React.FunctionComponent<IDataTableProps> = (props) => {
       );
     });
   };
-  const copyToClipboard = async (url: string) => {
+  const copyToClipboard = async (code: string) => {
+    const full = shortLink(code);
     try {
-      await navigator.clipboard.writeText(`${serverUrl}/shortUrl/${url}`);
-      alert(`URL Copied: ${serverUrl}/shortUrl/${url}`);
-    } catch (error) {
-      console.log(error);
+      await navigator.clipboard.writeText(full);
+      alert(`Copied: ${full}`);
+    } catch {
+      alert("Could not copy to clipboard.");
     }
   };
   const deleteUrl = async (id: string) => {
-    const response = await axios.delete(`${serverUrl}/shortUrl/${id}`);
-    console.log(response);
-    updateReloadState();
+    try {
+      await axios.delete(`${serverUrl}/shortUrl/${id}`);
+      updateReloadState();
+    } catch {
+      alert("Could not delete this link.");
+    }
   };
   return (
     <div className="conatiner mx-auto pt-2 pb-10">

@@ -16,15 +16,18 @@ const Container: React.FunctionComponent<IContainerProps> = () => {
   };
 
   const fetchTableData = async () => {
-    const response = await axios.get(`${serverUrl}/shortUrl`);
-    console.log("The response from the server is: ", response);
-    setData(response.data);
-    setReload(false);
-    console.log(data);
+    try {
+      const response = await axios.get<UrlData[]>(`${serverUrl}/shortUrl`);
+      setData(Array.isArray(response.data) ? response.data : []);
+    } catch {
+      setData([]);
+    } finally {
+      setReload(false);
+    }
   };
 
   React.useEffect(() => {
-    fetchTableData();
+    void fetchTableData();
   }, [reload]);
   return (
     <>
