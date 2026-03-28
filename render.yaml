@@ -1,0 +1,18 @@
+# Render Blueprint: API lives in server-app (monorepo).
+# New service: Dashboard → New → Blueprint → connect repo (detects this file).
+# Existing service: Settings → Root Directory → server-app (no blueprint required).
+
+services:
+  - type: web
+    name: url-shortener-api
+    runtime: node
+    rootDir: server-app
+    buildCommand: npm install && npm run build
+    startCommand: npm start
+    envVars:
+      - key: NODE_VERSION
+        value: "22"
+      - key: CONNECTION_STRING
+        sync: false
+      - key: FRONTEND_URL
+        sync: false
